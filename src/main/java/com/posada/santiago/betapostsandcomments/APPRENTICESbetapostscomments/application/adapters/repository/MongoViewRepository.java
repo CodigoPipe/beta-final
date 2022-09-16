@@ -30,18 +30,20 @@ public class MongoViewRepository implements DomainViewRepository {
     @Override
     public Mono<PostViewModel> findByAggregateId(String aggregateId) {
         /**Make the implementation, using the template, to find a post by its aggregateId*/
-        return template.findOne(Query.query(Criteria.where("aggregateId").is(aggregateId)),PostViewModel.class);
+
+        return template.findOne(Query.query(Criteria.where("aggregateId").is(aggregateId)),PostViewModel.class)
+                .doOnSuccess(postViewModel -> log.info("post founded succesfully"));
     }
 
     @Override
     public Flux<PostViewModel> findAllPosts() {
         /**make the implementation, using the template, of the method find all posts that are stored in the db*/
-        return template.findAll(PostViewModel.class);
+        return template.findAll(PostViewModel.class).doOnComplete(() -> log.info("post founded succesfully"));
     }
 
     @Override
     public Mono<PostViewModel> saveNewPost(PostViewModel post) {
-        return template.save(post);
+        return template.save(post).doOnSuccess(postViewModel -> log.info("post saved succesfully"));
     }
 
     @Override
@@ -55,7 +57,7 @@ public class MongoViewRepository implements DomainViewRepository {
                     List<CommentViewModel> comments = postViewModel.getComments();
                     comments.add(comment);
                     update.set("comments", comments);
-                    return template.findAndModify(query, update, PostViewModel.class);
+                    return template.findAndModify(query, update, PostViewModel.class).doOnSuccess(postViewModel1 -> log.info("post saved succesfully"));
                 });
         /** make the implementation, using the template, to find the post in the database that you want to add the comment to,
          * then add the comment to the list of comments and using the Update class update the existing post
